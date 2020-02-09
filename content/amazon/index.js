@@ -9,11 +9,15 @@ const authorNameSelector =
   "div:nth-child(1) > a > div.a-profile-content > span.a-profile-name";
 const geoDateSelector = "span.review-date";
 const rateSelector = "i.review-rating > span";
+const helpfulSelector =
+  "div.a-row.review-comments.cr-vote-action-bar > span.cr-vote > div.a-row.a-spacing-small > span";
 
 // REGEX
 const authorUrlRegex = /.*\/(.*)\/(.*)$/;
 const geoDateRegex = /Reviewed in (.*) on (.*)/;
 const rateRegex = /(.*) out of 5 stars/;
+// const helpfulRegex = /(.*) people found this helpful/;
+const helpfulRegex = /(.*) (people|person) found this helpful/;
 
 // DOM EXTRACTION
 const rawComments = [...document.querySelectorAll('[id^="customer_review"]')];
@@ -51,12 +55,36 @@ function getRate(commentElement) {
   return parseFloat(rate, 10);
 }
 
+function getHelpfulness(commentElement) {
+  let helpfulElement = commentElement.querySelector(helpfulSelector);
+  if (!helpfulElement) {
+    return undefined;
+  }
+  let helpfulText = helpfulElement.innerText;
+  let [, helpful, peopleOrPerson] = helpfulText.match(helpfulRegex);
+  return peopleOrPerson === "people" ? parseInt(helpful, 10) : 1;
+}
+
+function hasVideo(commentElement) {
+  return commentElement.querySelector(".video-block") ? true : false;
+}
+
+function getPhotosCount(commentElement) {
+  const photos = [...commentElement.querySelectorAll("img")];
+  return photos.lenght > 0 ? photos.length : 0;
+}
+
 const comments = rawComments.map(commentElement => {
   const author = getAuthor(commentElement);
   const { geo, date } = getGeoDate(commentElement);
   const rate = getRate(commentElement);
+  const helpfulness = getHelpfulness(commentElement);
   const mainText = commentElement.querySelector(mainTextSelector).innerText;
   const titleText = commentElement.querySelector(titleTextSelector).innerText;
+  const mediaAssets = {
+    video: hasVideo(commentElement),
+    photos: getPhotosCount(commentElement)
+  };
   console.log("comment: ", {
     element: commentElement,
     author,
@@ -64,7 +92,9 @@ const comments = rawComments.map(commentElement => {
     mainText,
     rate,
     date,
-    geo
+    geo,
+    helpfulness,
+    mediaAssets
   });
   return {
     element: commentElement,
@@ -73,7 +103,9 @@ const comments = rawComments.map(commentElement => {
     mainText,
     rate,
     date,
-    geo
+    geo,
+    helpfulness,
+    mediaAssets
   };
 });
 
