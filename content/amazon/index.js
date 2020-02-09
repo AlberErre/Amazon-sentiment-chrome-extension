@@ -76,6 +76,7 @@ function getPhotosCount(commentElement) {
 }
 
 const comments = rawComments.map(commentElement => {
+  const id = btoa(Math.random() * Date.now() + Date.now()).substring(0, 12);
   const author = getAuthor(commentElement);
   const { geo, date } = getGeoDate(commentElement);
   const rate = getRate(commentElement);
@@ -88,6 +89,7 @@ const comments = rawComments.map(commentElement => {
   };
   // console.log("comment: ", {
   //   element: commentElement,
+  //   elementId: id,
   //   author,
   //   titleText,
   //   mainText,
@@ -99,6 +101,7 @@ const comments = rawComments.map(commentElement => {
   // });
   return {
     element: commentElement,
+    elementId: id,
     author,
     titleText,
     mainText,
@@ -113,6 +116,16 @@ const comments = rawComments.map(commentElement => {
 // SEND MESSAGE
 let message = { comments: comments };
 
-chrome.runtime.sendMessage(message, function(result) {
-  console.log(result);
+chrome.runtime.sendMessage(message, function(results) {
+  if (!results) return;
+  results.forEach(result => {
+    let commentElement = comments.find(
+      comment => comment.elementId === result.elementId
+    );
+    if (result.sentiment === "negative") {
+      commentElement.element.style.setProperty("background", "red");
+    }
+    console.log("commentElement", commentElement);
+    console.log("result", result);
+  });
 });
