@@ -87,18 +87,6 @@ const comments = rawComments.map(commentElement => {
     video: hasVideo(commentElement),
     photos: getPhotosCount(commentElement)
   };
-  // console.log("comment: ", {
-  //   element: commentElement,
-  //   elementId: id,
-  //   author,
-  //   titleText,
-  //   mainText,
-  //   rate,
-  //   date,
-  //   geo,
-  //   helpfulness,
-  //   mediaAssets
-  // });
   return {
     element: commentElement,
     elementId: id,
@@ -113,10 +101,26 @@ const comments = rawComments.map(commentElement => {
   };
 });
 
-// SEND MESSAGE
-let message = { comments: comments };
+// DRAW RESULTS
+const UIStyle = {
+  background: "green",
+  position: "absolute",
+  top: "0",
+  right: "0",
+  padding: "1em"
+};
 
-chrome.runtime.sendMessage(message, function(results) {
+function generateUI(sentiment) {
+  let ui = document.createElement("div");
+  Object.keys(UIStyle).forEach(key => {
+    ui.style.setProperty(key, UIStyle[key]);
+  });
+  let uiContent = "<span>This is working!</span>";
+  ui.innerHTML = uiContent;
+  return ui;
+}
+
+function handleModelResult(results) {
   if (!results) return;
   results.forEach(result => {
     let commentElement = comments.find(
@@ -124,8 +128,14 @@ chrome.runtime.sendMessage(message, function(results) {
     );
     if (result.sentiment === "negative") {
       commentElement.element.style.setProperty("background", "red");
+      commentElement.element.style.setProperty("position", "relative");
+      commentElement.element.appendChild(generateUI(result.sentiment));
     }
     console.log("commentElement", commentElement);
     console.log("result", result);
   });
-});
+}
+
+// SEND MESSAGE
+let message = { comments: comments };
+chrome.runtime.sendMessage(message, handleModelResult);
