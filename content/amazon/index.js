@@ -1,6 +1,7 @@
 // SELECTORS
 const mainTextSelector =
   "div.a-row.a-spacing-small.review-data > span > div > div.a-expander-content.reviewText.review-text-content.a-expander-partial-collapse-content > span";
+const titleTextSelector = ".review-title.review-title-content > span";
 const authorNoUrlNameSelector =
   "div:nth-child(1) > div > div.a-profile-content > span.a-profile-name";
 const authorUrlSelector = "div:nth-child(1) > a";
@@ -55,14 +56,24 @@ const comments = rawComments.map(commentElement => {
   const { geo, date } = getGeoDate(commentElement);
   const rate = getRate(commentElement);
   const mainText = commentElement.querySelector(mainTextSelector).innerText;
-
+  const titleText = commentElement.querySelector(titleTextSelector).innerText;
+  console.log("comment: ", {
+    element: commentElement,
+    author,
+    titleText,
+    mainText,
+    rate,
+    date,
+    geo
+  });
   return {
     element: commentElement,
     author,
+    titleText,
     mainText,
-    geo,
+    rate,
     date,
-    rate
+    geo
   };
 });
 
