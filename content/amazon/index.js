@@ -103,11 +103,11 @@ const comments = rawComments.map(commentElement => {
 
 // DRAW RESULTS
 const UIStyle = {
-  background: "green",
   position: "absolute",
   top: "0",
   right: "0",
-  padding: "1em"
+  padding: "0.5em",
+  border: "1px solid black"
 };
 
 function generateUI(sentiment) {
@@ -115,7 +115,9 @@ function generateUI(sentiment) {
   Object.keys(UIStyle).forEach(key => {
     ui.style.setProperty(key, UIStyle[key]);
   });
-  let uiContent = "<span>This is working!</span>";
+  let uiContent = `<span>${
+    sentiment === "negative" ? "Negative" : "Positive"
+  } Comment ${sentiment === "negative" ? "😡" : "😄"}</span>`;
   ui.innerHTML = uiContent;
   return ui;
 }
@@ -126,13 +128,8 @@ function handleModelResult(results) {
     let commentElement = comments.find(
       comment => comment.elementId === result.elementId
     );
-    if (result.sentiment === "negative") {
-      commentElement.element.style.setProperty("background", "red");
-      commentElement.element.style.setProperty("position", "relative");
-      commentElement.element.appendChild(generateUI(result.sentiment));
-    }
-    console.log("commentElement", commentElement);
-    console.log("result", result);
+    commentElement.element.style.setProperty("position", "relative");
+    commentElement.element.appendChild(generateUI(result.sentiment));
   });
 }
 
