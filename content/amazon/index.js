@@ -11,12 +11,13 @@ const geoDateSelector = "span.review-date";
 const rateSelector = "i.review-rating > span";
 const helpfulSelector =
   "div.a-row.review-comments.cr-vote-action-bar > span.cr-vote > div.a-row.a-spacing-small > span";
+const videoSelector = ".video-block";
+const imageCountSelector = "div.review-image-tile-section > img";
 
 // REGEX
 const authorUrlRegex = /.*\/(.*)\/(.*)$/;
 const geoDateRegex = /Reviewed in (.*) on (.*)/;
 const rateRegex = /(.*) out of 5 stars/;
-// const helpfulRegex = /(.*) people found this helpful/;
 const helpfulRegex = /(.*) (people|person) found this helpful/;
 
 // DOM EXTRACTION
@@ -66,12 +67,12 @@ function getHelpfulness(commentElement) {
 }
 
 function hasVideo(commentElement) {
-  return commentElement.querySelector(".video-block") ? true : false;
+  return commentElement.querySelector(videoSelector) ? true : false;
 }
 
 function getPhotosCount(commentElement) {
-  const photos = [...commentElement.querySelectorAll("img")];
-  return photos.lenght > 0 ? photos.length : 0;
+  const photos = [...commentElement.querySelectorAll(imageCountSelector)];
+  return photos.length > 0 ? photos.length : 0;
 }
 
 const comments = rawComments.map(commentElement => {
@@ -85,17 +86,17 @@ const comments = rawComments.map(commentElement => {
     video: hasVideo(commentElement),
     photos: getPhotosCount(commentElement)
   };
-  console.log("comment: ", {
-    element: commentElement,
-    author,
-    titleText,
-    mainText,
-    rate,
-    date,
-    geo,
-    helpfulness,
-    mediaAssets
-  });
+  // console.log("comment: ", {
+  //   element: commentElement,
+  //   author,
+  //   titleText,
+  //   mainText,
+  //   rate,
+  //   date,
+  //   geo,
+  //   helpfulness,
+  //   mediaAssets
+  // });
   return {
     element: commentElement,
     author,
