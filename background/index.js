@@ -29,8 +29,20 @@ chrome.runtime.onInstalled.addListener(function() {
   });
 });
 
-function saveCommentOnDB(comment) {
-  // TODO: save on DB here
+function saveCommentsOnDB(rawComments) {
+  // remove element and elementId data from rawComments
+  const comments = rawComments.map(comment => {
+    const { element, elementId, ...comment } = comment;
+    return comment;
+  });
+  fetch("http://api.fakers.ai/amazon-model/save", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(comments)
+  });
 }
 
 // onMessage needs to return true when handling async response (sendResponse)
@@ -38,8 +50,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (!request.comments || request.comments.length === 0) {
     return false;
   }
-  request.comments.map(comment => {
-    saveCommentOnDB(comment);
-  });
+  saveCommentsOnDB(request.comments);
   return true;
 });

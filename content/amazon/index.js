@@ -79,10 +79,6 @@ const comments = rawComments.map(commentElement => {
   };
 });
 
-// STORE ON DB
-// let message = { comments: comments };
-// chrome.runtime.sendMessage(message);
-
 // DRAWING METHODS
 const styles = {
   position: "absolute",
@@ -106,11 +102,15 @@ function generateUI(score) {
 
 function drawComments(comments) {
   if (!comments || comments.length === 0) return;
-  comments.forEach(comment => {
+  const sentimentComments = comments.map(comment => {
     const { score } = sentimentModel.predict(comment.mainText);
     comment.element.style.setProperty("position", "relative");
     comment.element.appendChild(generateUI(score));
+    return { ...comment, predictedSentiment: score };
   });
+  // STORE ON DB
+  let message = { comments: sentimentComments };
+  chrome.runtime.sendMessage(message);
 }
 
 // HANDLE MODEL
