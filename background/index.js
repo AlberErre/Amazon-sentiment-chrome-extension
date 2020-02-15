@@ -35,14 +35,17 @@ function saveCommentsOnDB(rawComments) {
     const { element, elementId, ...comment } = rawComment;
     return comment;
   });
-  fetch("http://api.fakers.ai/amazon-model/save", {
+  const url = "http://api.fakers.ai/amazon-model/save";
+  fetch(url, {
     method: "POST",
+    body: JSON.stringify({ comments }), // data can be `string` or {object}!
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json"
-    },
-    body: JSON.stringify(comments)
-  });
+    }
+  })
+    .then(res => res.json())
+    .catch(error => console.error("Error on POST:", error));
 }
 
 // onMessage needs to return true when handling async response (sendResponse)
