@@ -1,26 +1,4 @@
-// SELECTORS
-const mainTextSelector =
-  "div.a-row.a-spacing-small.review-data > span > div > div.a-expander-content.reviewText.review-text-content.a-expander-partial-collapse-content > span";
-const titleTextSelector = ".review-title.review-title-content > span";
-const authorNoUrlNameSelector =
-  "div:nth-child(1) > div > div.a-profile-content > span.a-profile-name";
-const authorUrlSelector = "div:nth-child(1) > a";
-const authorNameSelector =
-  "div:nth-child(1) > a > div.a-profile-content > span.a-profile-name";
-const geoDateSelector = "span.review-date";
-const rateSelector = "i.review-rating > span";
-const helpfulSelector =
-  "div.a-row.review-comments.cr-vote-action-bar > span.cr-vote > div.a-row.a-spacing-small > span";
-const videoSelector = ".video-block";
-const imageCountSelector = "div.review-image-tile-section > img";
-
-// REGEX
-const authorUrlRegex = /.*\/(.*)\/(.*)$/;
-const geoDateRegex = /Reviewed in (.*) on (.*)/;
-const rateRegex = /(.*) out of 5 stars/;
-const helpfulRegex = /(.*) (people|person) found this helpful/;
-
-// DOM EXTRACTION
+// HANDLE COMMENTS
 const rawComments = [...document.querySelectorAll('[id^="customer_review"]')];
 
 function getAuthor(commentElement) {
@@ -101,8 +79,12 @@ const comments = rawComments.map(commentElement => {
   };
 });
 
-// DRAW RESULTS
-const UIStyle = {
+// STORE ON DB
+// let message = { comments: comments };
+// chrome.runtime.sendMessage(message);
+
+// DRAWING METHODS
+const styles = {
   position: "absolute",
   top: "0",
   right: "0",
@@ -112,27 +94,38 @@ const UIStyle = {
 
 function generateUI(sentiment) {
   let ui = document.createElement("div");
-  Object.keys(UIStyle).forEach(key => {
-    ui.style.setProperty(key, UIStyle[key]);
+  Object.keys(styles).forEach(key => {
+    ui.style.setProperty(key, styles[key]);
   });
   let uiContent = `<span>${
-    sentiment === "negative" ? "Negative" : "Positive"
-  } Comment ${sentiment === "negative" ? "😡" : "😄"}</span>`;
+    sentiment >= 0.5 ? "Positive" : "Negative"
+  } Comment ${sentiment >= 0.5 ? "😄" : "😡"}</span>`;
   ui.innerHTML = uiContent;
   return ui;
 }
 
-function handleModelResult(results) {
-  if (!results) return;
-  results.forEach(result => {
-    let commentElement = comments.find(
-      comment => comment.elementId === result.elementId
-    );
-    commentElement.element.style.setProperty("position", "relative");
-    commentElement.element.appendChild(generateUI(result.sentiment));
+// HANDLE MODEL
+let modelReady = false;
+const sentimentModel = ml5.sentiment("movieReviews", () => {
+  modelReady = true;
+});
+
+function drawComments(comments) {
+  console.log("draw called");
+  if (!comments || comments.length === 0) return;
+  if (modelReady !== true) {
+    setTimeout(() => {
+      drawComments(comments);
+    }, 1000);
+    return;
+  }
+  comments.forEach(comment => {
+    const sentiment = sentimentModel.predict(comment.mainText);
+    console.log("comment.mainText", comment.mainText);
+    console.log("sentiment", sentiment);
+    comment.element.style.setProperty("position", "relative");
+    comment.element.appendChild(generateUI(sentiment));
   });
 }
 
-// SEND MESSAGE
-let message = { comments: comments };
-chrome.runtime.sendMessage(message, handleModelResult);
+drawComments(comments);
