@@ -92,40 +92,28 @@ const styles = {
   border: "1px solid black"
 };
 
-function generateUI(sentiment) {
+function generateUI(score) {
   let ui = document.createElement("div");
   Object.keys(styles).forEach(key => {
     ui.style.setProperty(key, styles[key]);
   });
-  let uiContent = `<span>${
-    sentiment >= 0.5 ? "Positive" : "Negative"
-  } Comment ${sentiment >= 0.5 ? "😄" : "😡"}</span>`;
+  const uiContent = `<span>${score >= 0.5 ? "Positive" : "Negative"} Comment ${
+    score >= 0.5 ? "😄" : "😡"
+  }</span>`;
   ui.innerHTML = uiContent;
   return ui;
 }
 
-// HANDLE MODEL
-let modelReady = false;
-const sentimentModel = ml5.sentiment("movieReviews", () => {
-  modelReady = true;
-});
-
 function drawComments(comments) {
-  console.log("draw called");
   if (!comments || comments.length === 0) return;
-  if (modelReady !== true) {
-    setTimeout(() => {
-      drawComments(comments);
-    }, 1000);
-    return;
-  }
   comments.forEach(comment => {
-    const sentiment = sentimentModel.predict(comment.mainText);
-    console.log("comment.mainText", comment.mainText);
-    console.log("sentiment", sentiment);
+    const { score } = sentimentModel.predict(comment.mainText);
     comment.element.style.setProperty("position", "relative");
-    comment.element.appendChild(generateUI(sentiment));
+    comment.element.appendChild(generateUI(score));
   });
 }
 
-drawComments(comments);
+// HANDLE MODEL
+const sentimentModel = ml5.sentiment("movieReviews", () => {
+  drawComments(comments);
+});
