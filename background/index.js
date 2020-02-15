@@ -31,8 +31,8 @@ chrome.runtime.onInstalled.addListener(function() {
 
 function saveCommentsOnDB(rawComments) {
   // remove element and elementId data from rawComments
-  const comments = rawComments.map(comment => {
-    const { element, elementId, ...comment } = comment;
+  const comments = rawComments.map(rawComment => {
+    const { element, elementId, ...comment } = rawComment;
     return comment;
   });
   fetch("http://api.fakers.ai/amazon-model/save", {
