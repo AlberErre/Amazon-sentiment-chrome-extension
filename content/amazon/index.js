@@ -1,4 +1,3 @@
-// HANDLE COMMENTS
 const rawComments = [...document.querySelectorAll('[id^="customer_review"]')];
 
 function getAuthor(commentElement) {
@@ -79,24 +78,12 @@ const comments = rawComments.map(commentElement => {
   };
 });
 
-// DRAWING METHODS
-const styles = {
-  position: "absolute",
-  top: "0",
-  right: "0",
-  padding: "0.5em",
-  border: "1px solid black"
-};
-
 function generateUI(score) {
   let ui = document.createElement("div");
-  Object.keys(styles).forEach(key => {
-    ui.style.setProperty(key, styles[key]);
-  });
-  const uiContent = `<span>${score >= 0.5 ? "Positive" : "Negative"} Comment ${
+  ui.classList.add("commentSentiment");
+  ui.innerHTML = `<span>${score >= 0.5 ? "Positive" : "Negative"} Comment ${
     score >= 0.5 ? "😄" : "😡"
   }</span>`;
-  ui.innerHTML = uiContent;
   return ui;
 }
 
@@ -113,7 +100,6 @@ function drawComments(comments) {
   chrome.runtime.sendMessage(message);
 }
 
-// HANDLE MODEL
 const sentimentModel = ml5.sentiment("movieReviews", () => {
   drawComments(comments);
 });
